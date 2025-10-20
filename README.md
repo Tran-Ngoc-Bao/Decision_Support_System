@@ -1,2 +1,23 @@
-# Decision_Support_System
-Building a decision support system to help customers find accommodation
+# IT4341 - Decision Support Systems - Master - SOICT - HUST
+
+## Introduction
+<ul>
+  <li>Name of project: Building a decision support system to help customers find accommodation</li>
+  <li>Project objective:
+    <ul>
+      <li></li>
+    </ul>
+  </li>
+</ul>
+
+## System architecture
+
+
+## Deloyment
+
+
+## Demo
+
+
+## Report
+
