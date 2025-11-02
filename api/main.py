@@ -1,3 +1,5 @@
+from http.client import HTTPException
+
 from fastapi import FastAPI, Depends
 from typing import List
 import os
