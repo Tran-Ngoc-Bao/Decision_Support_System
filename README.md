@@ -14,7 +14,9 @@
 
 
 ## Deloyment
-
+```
+cd official-build && docker-compose up -d --build
+```
 
 ## Demo
 

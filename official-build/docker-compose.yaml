@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  database:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: system
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../data/dump:/tmp
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notebook:
+    build:
+      context: ./notebook
+      dockerfile: Dockerfile
+    image: jupyter-notebook-postgres
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      JUPYTER_TOKEN: mytoken
+      POSTGRES_HOST: database
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: system
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../:/home/jovyan/work
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
