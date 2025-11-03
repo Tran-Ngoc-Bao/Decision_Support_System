@@ -47,6 +47,11 @@ CREATE TABLE IF NOT EXISTS house_rent (
   longtitude double precision,
   title text,
   phone_number varchar(10),
+  house_type text,
+  contract_period text,
+  bedrooms int,
+  living_rooms int,
+  kitchens int,
   create_time timestamp DEFAULT now(),
   update_time timestamp DEFAULT now(),
   CONSTRAINT fk_house_rent_ward
