@@ -24,7 +24,7 @@ def get_house_types(conn=Depends(get_db_connection)):
 def get_amenities(conn=Depends(get_db_connection)):
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT id, category, value FROM public.house_rent WHERE category IS NOT NULL ORDER BY category")
+            cur.execute("SELECT id, category, value FROM public.environment WHERE category IS NOT NULL ORDER BY category")
             amenities = cur.fetchall()
         conn.close()
         return amenities
