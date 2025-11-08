@@ -29,6 +29,14 @@ class HouseTypeItem(BaseModel):
     """
     name: str
 
+class EnvironmentItem(BaseModel):
+    """
+    Response model for an environment item.
+    """
+    id: int
+    category: str
+    value: str
+
 class HouseRentItem(BaseModel):
     """
     Response model for a single house rent listing.
@@ -57,3 +65,20 @@ class HouseRentItem(BaseModel):
     district_name: str
     province_name: str
     environments: List[EnvironmentTag] = []
+
+class CompareRequest(BaseModel):
+    """
+    Request model for the TOPSIS endpoint.
+    """
+    house_rent_ids: List[int]
+    amenities: List[int]
+    weights: List[int]
+    anchor_price: float
+    anchor_acreage: int
+
+class CompareResultItem(HouseRentItem):
+    """
+    Response model for a single item in the TOPSIS result list.
+    """
+    topsis_score: float
+    rank: int
