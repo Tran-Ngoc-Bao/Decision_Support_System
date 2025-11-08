@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import List
 
-from .middleware.middleware import setup_middlewares
+from .middleware.default import setup_middlewares
 from .routers import locations, search, item
 
 app = FastAPI(title="House Rental API", version="1.0.0")

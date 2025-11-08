@@ -16,6 +16,13 @@ class LocationItem(BaseModel):
     id: int
     name: str
 
+class EnvironmentTag(BaseModel):
+    """
+    Response model for an environment tag.
+    """
+    category: str
+    value: str
+
 class HouseTypeItem(BaseModel):
     """
     Response model for a house type.
@@ -49,3 +56,4 @@ class HouseRentItem(BaseModel):
     ward_name: str
     district_name: str
     province_name: str
+    environments: List[EnvironmentTag] = []

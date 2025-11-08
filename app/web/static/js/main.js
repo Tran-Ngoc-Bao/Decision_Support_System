@@ -135,6 +135,11 @@ function displayResults(listings) {
 
         const fullAddress = `${listing.address}`;
 
+        // Tạo HTML cho các thẻ tiện nghi
+        const tagsHtml = (listing.environments || [])
+            .map(tag => `<span class="tag">${tag.value}</span>`)
+            .join('');
+
         card.innerHTML = `
             <div class="card-content">
                 <h3 class="card-title">${listing.title}</h3>
@@ -142,6 +147,7 @@ function displayResults(listings) {
                 <p class="card-info"><strong>Loại hình:</strong> ${listing.house_type || 'N/A'}</p>
                 <p class="card-info"><strong>Hợp đồng:</strong> ${listing.contract_period || 'N/A'}</p>
                 <p class="card-info"><strong>Liên hệ:</strong> ${listing.phone_number || 'N/A'}</p>
+                <div class="tags-container">${tagsHtml}</div>
             </div>
             <div class="card-footer">
                 <span class="price">${listing.price} triệu/tháng</span> - 

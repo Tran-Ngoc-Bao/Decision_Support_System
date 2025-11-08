@@ -2,6 +2,8 @@ from typing import List
 
 from fastapi import Query, Depends, HTTPException, APIRouter
 from psycopg2.extras import RealDictCursor
+from collections import defaultdict
+
 
 from ..dependency.db_connect import get_db_connection
 from ..model.models import HouseRentItem
@@ -63,8 +65,35 @@ def search_house_rent(
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, tuple(params))
             results = cur.fetchall()
+    
+        if not results:
+            conn.close()
+            return []
+        
+        house_ids = [row['id'] for row in results]
+        
+        house_ids_tuple = tuple(house_ids)
+
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                SELECT hre.house_rent_id, e.category, e.value
+                FROM public.house_rent_environment hre
+                JOIN public.environment e ON hre.environment_id = e.id
+                WHERE hre.house_rent_id IN %s
+            """, (house_ids_tuple,))
+            env_rows = cur.fetchall()
+
+        environments_by_house_id = defaultdict(list)
+        for env in env_rows:
+            environments_by_house_id[env['house_rent_id']].append(env)
+
+        for row in results:
+            row['environments'] = environments_by_house_id.get(row['id'], [])
+        
         conn.close()
         return results
+
     except Exception as e:
+        print(f"ERROR in search_house_rent: {e}")
         conn.close()
         raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
