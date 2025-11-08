@@ -41,7 +41,7 @@ services:
   api:
     build:
       context: ../
-      dockerfile: official-build/api/Dockerfile
+      dockerfile: official-build/app/Dockerfile
     image: fastapi-app
     depends_on:
       database:
@@ -55,7 +55,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ../api:/app
+      - ../app:/app
     restart: unless-stopped
 
 volumes:
