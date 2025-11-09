@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Kiếm Nhà Trọ</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        #search-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        #search-form .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        #search-form label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        #search-form input, #search-form select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        #search-form button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            grid-column: 1 / -1; /* Span full width */
+            transition: background-color 0.3s;
+        }
+        #search-form button:hover {
+            background-color: #2980b9;
+        }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin: 0 0 10px;
+            color: #3498db;
+        }
+        .card-info {
+            margin-bottom: 10px;
+        }
+        .card-info strong {
+            color: #555;
+        }
+        .card-footer {
+            background-color: #f9f9f9;
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            font-weight: bold;
+        }
+        .price {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+        .acreage {
+            color: #27ae60;
+        }
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 15px;
+        }
+        .tag {
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        .pagination-controls button {
+            padding: 8px 16px;
+            border: 1px solid #3498db;
+            background-color: #fff;
+            color: #3498db;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: #3498db;
+            color: #fff;
+        }
+        .pagination-controls button:disabled {
+            border-color: #ccc;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Hệ Thống Hỗ Trợ Tìm Kiếm Nhà Trọ</h1>
+
+    <form id="search-form">
+        <div class="form-group">
+            <label for="province_id">Tỉnh/Thành phố</label>
+            <select id="province_id" name="province_id">
+                <option value="">-- Chọn Tỉnh/Thành --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="district_id">Quận/Huyện</label>
+            <select id="district_id" name="district_id">
+                <option value="">-- Chọn Quận/Huyện --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="ward_id">Phường/Xã</label>
+            <select id="ward_id" name="ward_id">
+                <option value="">-- Chọn Phường/Xã --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="min_price">Giá tối thiểu (triệu)</label>
+            <input type="number" id="min_price" name="min_price" placeholder="VD: 3" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="max_price">Giá tối đa (triệu)</label>
+            <input type="number" id="max_price" name="max_price" placeholder="VD: 7" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="min_acreage">Diện tích tối thiểu (m²)</label>
+            <input type="number" id="min_acreage" name="min_acreage" placeholder="VD: 20">
+        </div>
+        <div class="form-group">
+            <label for="max_acreage">Diện tích tối đa (m²)</label>
+            <input type="number" id="max_acreage" name="max_acreage" placeholder="VD: 50">
+        </div>
+        <div class="form-group">
+            <label for="house_type">Loại hình</label>
+            <select id="house_type" name="house_type">
+                <option value="">-- Tất cả loại hình --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="contract_period">Hợp đồng</label>
+            <input type="text" id="contract_period" name="contract_period" placeholder="VD: 6 THÁNG">
+        </div>
+        <button type="submit">Tìm Kiếm</button>
+    </form>
+
+    <div id="results">
+        <!-- Kết quả tìm kiếm sẽ được chèn vào đây -->
+    </div>
+
+    <div id="pagination-controls" class="pagination-controls">
+        <button id="prev-page" disabled>&laquo; Trang trước</button>
+        <span id="page-info">Trang 1</span>
+        <button id="next-page" disabled>Trang sau &raquo;</button>
+    </div>
+</div>
+
+<script src="/static/js/main.js"></script>
+
+</body>
+</html>
