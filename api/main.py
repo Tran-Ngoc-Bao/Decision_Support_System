@@ -3,8 +3,9 @@ from http.client import HTTPException
 from fastapi import FastAPI, Depends
 
 from psycopg2.extras import RealDictCursor
+from typing import List
 from model import ItemSearch, HouseRentListRequest
-from function import get_db_connection, get_list_ward_ids, get_lists_environment_ids
+from function import get_db_connection, get_list_ward_ids, get_lists_environment_ids, save_actions_results, save_log_actions
 
 app = FastAPI()
 
@@ -84,7 +85,7 @@ def get_contract_periods(conn=Depends(get_db_connection)):
         raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
     
 # Search endpoint
-@app.post("/search/")
+@app.post("/search")
 def search(item_search: ItemSearch, conn=Depends(get_db_connection)):
     try:
         list_ward_ids = get_list_ward_ids(
@@ -93,53 +94,87 @@ def search(item_search: ItemSearch, conn=Depends(get_db_connection)):
             item_search.ward_id,
             conn
         )
-        str_ward_ids = ','.join(map(str, list_ward_ids))
-
         list_environment_ids = get_lists_environment_ids(
             item_search.search_content,
             conn
         )
-        str_environment_ids = ','.join(map(str, list_environment_ids))
+
+        sql = """
+            SELECT DISTINCT hr.id
+            FROM public.house_rent_environment hre
+            LEFT JOIN public.house_rent hr ON hre.house_rent_id = hr.id
+            WHERE hr.available = TRUE
+        """
+        params: List = []
+
+        sql += " AND hr.ward_id = ANY(%s)"
+        params.append(list_ward_ids)
+
+        sql += " AND hre.environment_id = ANY(%s)"
+        params.append(list_environment_ids)
+
+        if item_search.price_min is not None:
+            sql += " AND hr.price >= %s"
+            params.append(item_search.price_min)
+        if item_search.price_max is not None:
+            sql += " AND hr.price <= %s"
+            params.append(item_search.price_max)
+
+        if item_search.acreage_min is not None:
+            sql += " AND hr.acreage >= %s"
+            params.append(item_search.acreage_min)
+        if item_search.acreage_max is not None:
+            sql += " AND hr.acreage <= %s"
+            params.append(item_search.acreage_max)
+
+        if item_search.house_type is not None and str(item_search.house_type).strip() != "":
+            sql += " AND hr.house_type = %s"
+            params.append(item_search.house_type)
+
+        if item_search.contract_period is not None and str(item_search.contract_period).strip() != "":
+            sql += " AND hr.contract_period = %s"
+            params.append(item_search.contract_period)
+
+        if item_search.bedrooms is not None:
+            sql += " AND hr.bedrooms = %s"
+            params.append(item_search.bedrooms)
+
+        if item_search.living_rooms is not None:
+            sql += " AND hr.living_rooms = %s"
+            params.append(item_search.living_rooms)
+
+        if item_search.kitchens is not None:
+            sql += " AND hr.kitchens = %s"
+            params.append(item_search.kitchens)
+        
+        print("Final SQL:", sql)
 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            query = """
-                SELECT DISTINCT hr.id FROM
-                public.house_rent_environment hre
-                LEFT JOIN public.house_rent hr
-                ON hre.house_rent_id = hr.id
-                WHERE hr.available = TRUE
-                AND hr.ward_id IN (%s)
-                AND hre.environment_id IN (%s)
-                AND hr.price BETWEEN %s AND %s
-                AND hr.acreage BETWEEN %s AND %s
-                AND (%s IS NULL OR %s = '' OR hr.house_type = %s)
-                AND (%s IS NULL OR %s = '' OR hr.contract_period = %s)
-                AND (%s IS NULL OR hr.bedrooms = %s)
-                AND (%s IS NULL OR hr.living_rooms = %s)
-                AND (%s IS NULL OR hr.kitchens = %s)
-            """
-            cur.execute(query, (
-                str_ward_ids,
-                str_environment_ids,
-                item_search.price_min,
-                item_search.price_max,
-                item_search.acreage_min,
-                item_search.acreage_max,
-                item_search.house_type,
-                item_search.contract_period,
-                item_search.bedrooms,
-                item_search.living_rooms,
-                item_search.kitchens
-            ))
+            final_query = cur.mogrify(sql, tuple(params)).decode('utf-8')
+            print("Final SQL:", final_query)
+            cur.execute(sql, tuple(params))
             results = cur.fetchall()
-        conn.close()
+
+            action_id = save_log_actions("SEARCH", item_search, conn)
+            save_actions_results(action_id, [row["id"] for row in results], conn)
         return results
+
+    except HTTPException:
+        raise
     except Exception as e:
-        conn.close()
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
     
 # Detail endpoint
-@app.post("/house_rents/details/")
+@app.post("/house_rents_details")
 def get_house_rent_details(
     req: HouseRentListRequest,
     conn=Depends(get_db_connection)

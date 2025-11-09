@@ -3,6 +3,8 @@ import os
 from typing import List, Optional
 import psycopg2
 
+from model import ItemSearch
+
 def get_db_connection():
     conn = psycopg2.connect(
         host=os.environ.get("POSTGRES_HOST"),
@@ -67,3 +69,84 @@ def get_lists_environment_ids(
         return environment_ids
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve environment IDs: {e}")
+    
+def save_log_actions(
+    action: str,
+    item_search: ItemSearch,
+    conn
+) -> int:
+    try:
+        sql = """
+            INSERT INTO public.log_actions (
+                action,
+                province_id,
+                district_id,
+                ward_id,
+                search_content,
+                persons,
+                price_min,
+                price_max,
+                acreage_min,
+                acreage_max,
+                house_type,
+                contract_period,
+                bedrooms,
+                living_rooms,
+                kitchens
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """
+        params = (
+            action,
+            item_search.province_id,
+            item_search.district_id,
+            item_search.ward_id,
+            item_search.search_content,
+            item_search.persons,
+            item_search.price_min,
+            item_search.price_max,
+            item_search.acreage_min,
+            item_search.acreage_max,
+            item_search.house_type,
+            item_search.contract_period,
+            item_search.bedrooms,
+            item_search.living_rooms,
+            item_search.kitchens,
+        )
+
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            row = cur.fetchone()
+            if not row:
+                conn.rollback()
+                raise HTTPException(status_code=500, detail="Failed to retrieve inserted id")
+            inserted_id = row[0]
+            conn.commit()
+        return inserted_id
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise HTTPException(status_code=500, detail=f"Failed to save log actions: {e}")
+    
+def save_actions_results(
+    action_id: int,
+    house_rent_ids: List[int],
+    conn
+):
+    try:
+        sql = """
+            INSERT INTO public.actions_results (log_action_id, house_rent_id, house_rent_order)
+            VALUES (%s, %s, %s)
+        """
+        with conn.cursor() as cur:
+            for house_rent_id in house_rent_ids:
+                cur.execute(sql, (action_id, house_rent_id, house_rent_ids.index(house_rent_id)))
+            conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save actions results: {e}")
