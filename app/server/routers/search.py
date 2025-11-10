@@ -1,99 +1,79 @@
 from typing import List
 
 from fastapi import Query, Depends, HTTPException, APIRouter
-from psycopg2.extras import RealDictCursor
-from collections import defaultdict
-
 
 from ..dependency.db_connect import get_db_connection
+from ..logic.house import HouseService
 from ..model.models import HouseRentItem
 
 router = APIRouter(prefix="/search", tags=["Search"])
 
 @router.get("/house-rent", response_model=List[HouseRentItem])
 def search_house_rent(
-    province_id: int = Query(None),
-    district_id: int = Query(None),
-    ward_id: int = Query(None),
-    min_price: float = Query(None),
-    max_price: float = Query(None),
-    min_acreage: float = Query(None),
-    max_acreage: float = Query(None),
-    house_type: str = Query(None),
-    contract_period: str = Query(None),
-    bedrooms: int = Query(None),
-    living_rooms: int = Query(None),
-    kitchens: int = Query(None),
-    limit: int = Query(10, ge=1, le=100), # Default limit to 10, min 1, max 100
-    offset: int = Query(0, ge=0),       # Default offset to 0, min 0
-    conn=Depends(get_db_connection)
+        province_id: int = Query(None),
+        district_id: int = Query(None),
+        ward_id: int = Query(None),
+        min_price: float = Query(None),
+        max_price: float = Query(None),
+        min_acreage: float = Query(None),
+        max_acreage: float = Query(None),
+        house_type: str = Query(None),
+        contract_period: str = Query(None),
+        bedrooms: int = Query(None),
+        living_rooms: int = Query(None),
+        kitchens: int = Query(None),
+        limit: int = Query(10, ge=1, le=100),
+        offset: int = Query(0, ge=0),
+        conn=Depends(get_db_connection)
 ):
+    """
+    Search for house rent listings with various filters
+    """
     try:
-        query = """
-            SELECT hr.*, w.name as ward_name, d.name as district_name, p.name as province_name
-            FROM house_rent hr
-            LEFT JOIN wards w ON hr.ward_id = w.id
-            LEFT JOIN districts d ON w.district_id = d.id
-            LEFT JOIN provinces p ON d.province_id = p.id
-            WHERE hr.available = TRUE
-        """
-        params = []
-        
-        def add_condition(field, value, operator="="):
-            nonlocal query
-            if value is not None:
-                query += f" AND {field} {operator} %s"
-                params.append(value)
+        results = HouseService.search_house_rent(
+            conn=conn,
+            province_id=province_id,
+            district_id=district_id,
+            ward_id=ward_id,
+            min_price=min_price,
+            max_price=max_price,
+            min_acreage=min_acreage,
+            max_acreage=max_acreage,
+            house_type=house_type,
+            contract_period=contract_period,
+            bedrooms=bedrooms,
+            living_rooms=living_rooms,
+            kitchens=kitchens,
+            limit=limit,
+            offset=offset
+        )
 
-        add_condition("p.id", province_id)
-        add_condition("d.id", district_id)
-        add_condition("hr.ward_id", ward_id)
-        add_condition("hr.price", min_price, ">=")
-        add_condition("hr.price", max_price, "<=")
-        add_condition("hr.acreage", min_acreage, ">=")
-        add_condition("hr.acreage", max_acreage, "<=")
-        add_condition("hr.house_type", house_type)
-        add_condition("hr.contract_period", contract_period)
-        add_condition("hr.bedrooms", bedrooms)
-        add_condition("hr.living_rooms", living_rooms)
-        add_condition("hr.kitchens", kitchens)
-
-        # Add LIMIT and OFFSET for pagination
-        query += " LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
-
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(query, tuple(params))
-            results = cur.fetchall()
-    
-        if not results:
-            conn.close()
-            return []
-        
-        house_ids = [row['id'] for row in results]
-        
-        house_ids_tuple = tuple(house_ids)
-
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("""
-                SELECT hre.house_rent_id, e.category, e.value
-                FROM public.house_rent_environment hre
-                JOIN public.environment e ON hre.environment_id = e.id
-                WHERE hre.house_rent_id IN %s
-            """, (house_ids_tuple,))
-            env_rows = cur.fetchall()
-
-        environments_by_house_id = defaultdict(list)
-        for env in env_rows:
-            environments_by_house_id[env['house_rent_id']].append(env)
-
-        for row in results:
-            row['environments'] = environments_by_house_id.get(row['id'], [])
-        
-        conn.close()
         return results
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"ERROR in search_house_rent: {e}")
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
+
+
+@router.get("/house-rent-by-id", response_model=HouseRentItem)
+def get_house_rent_by_id(
+        id: int = Query(...),
+        conn=Depends(get_db_connection)
+):
+    """
+    Get a single house rent listing by its ID
+    """
+    try:
+        result = HouseService.get_house_rent_by_id(conn=conn, house_rent_id=id)
+        if not result:
+            raise HTTPException(status_code=404, detail="House not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR in get_house_rent_by_id: {e}")
         conn.close()
         raise HTTPException(status_code=500, detail=f"Database query failed: {e}")

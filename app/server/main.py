@@ -28,3 +28,8 @@ app.include_router(dss.router, prefix="/api", tags=["DSS"])
 @app.get("/")
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/compare.html")
+def read_compare(request: Request):
+    return templates.TemplateResponse("compare.html", {"request": request})

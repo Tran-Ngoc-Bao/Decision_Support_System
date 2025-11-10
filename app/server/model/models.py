@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import date, datetime
 
 class DbCheck(BaseModel):
@@ -20,6 +20,7 @@ class EnvironmentTag(BaseModel):
     """
     Response model for an environment tag.
     """
+    id: int
     category: str
     value: str
 
@@ -71,10 +72,9 @@ class CompareRequest(BaseModel):
     Request model for the TOPSIS endpoint.
     """
     house_rent_ids: List[int]
-    amenities: List[int]
-    weights: List[int]
-    anchor_price: float
-    anchor_acreage: int
+    amenities: Optional[List[int]]
+    weights: Optional[List[int]]
+    topsis_weight: Optional[List[float]]
 
 class CompareResultItem(HouseRentItem):
     """
@@ -82,3 +82,11 @@ class CompareResultItem(HouseRentItem):
     """
     topsis_score: float
     rank: int
+
+class TopsisCompareResponse(BaseModel):
+    """
+    Response model for the full TOPSIS comparison result.
+    """
+    ranked_houses: List[CompareResultItem]
+    ideal_best: Dict[str, float]
+    ideal_worst: Dict[str, float]
