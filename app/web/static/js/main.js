@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             console.log('So sánh các ID:', Array.from(selectedListingIds));
             // TODO: Chuyển hướng đến trang so sánh với các ID đã chọn
-            // window.location.href = `/compare?ids=${Array.from(selectedListingIds).join(',')}`;
+            window.location.href = `/compare?ids=${Array.from(selectedListingIds).join(',')}`;
         });
     }
 
