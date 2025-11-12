@@ -1,12 +1,14 @@
 let currentPage = 1;
 const PAGE_SIZE = 12; // Hiển thị 12 kết quả mỗi trang
-
+let selectedListingIds = new Set(); 
 document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('search-form');
     const provinceSelect = document.getElementById('province_id');
     const districtSelect = document.getElementById('district_id');
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
+    const compareButton = document.getElementById('compare-button');
+    const clearSelectionButton = document.getElementById('clear-selection-btn');
 
     if (searchForm) {
         searchForm.addEventListener('submit', function(event) {
@@ -46,6 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPage++;
             fetchListings();
         });
+    }
+
+    if (compareButton) {
+        compareButton.addEventListener('click', () => {
+            // Tạm thời để trống action hoặc log ra console
+            if (selectedListingIds.size < 2) {
+                alert('Vui lòng chọn ít nhất 2 mục để so sánh.');
+                return;
+            }
+            console.log('So sánh các ID:', Array.from(selectedListingIds));
+            // TODO: Chuyển hướng đến trang so sánh với các ID đã chọn
+            // window.location.href = `/compare?ids=${Array.from(selectedListingIds).join(',')}`;
+        });
+    }
+
+    if (clearSelectionButton) {
+        clearSelectionButton.addEventListener('click', clearAllSelections);
     }
 
     // Tải dữ liệu ban đầu khi trang được mở
@@ -132,10 +151,14 @@ function displayResults(listings) {
     listings.forEach(listing => {
         const card = document.createElement('div');
         card.className = 'card';
+        card.setAttribute('data-listing-id', listing.id);
+        
+        if (selectedListingIds.has(listing.id)) {
+            card.classList.add('selected');
+        }
 
         const fullAddress = `${listing.address}`;
 
-        // Tạo HTML cho các thẻ tiện nghi
         const tagsHtml = (listing.environments || [])
             .map(tag => `<span class="tag">${tag.value}</span>`)
             .join('');
@@ -152,11 +175,60 @@ function displayResults(listings) {
             <div class="card-footer">
                 <span class="price">${listing.price} triệu/tháng</span> - 
                 <span class="acreage">${listing.acreage} m²</span>
-            </div>
+            </div>            
         `;
+
+        // Thêm sự kiện click
+        card.addEventListener('click', function() {
+            handleCardClick(this, listing.id);
+        });
+
         resultsContainer.appendChild(card);
     });
 }
+
+function handleCardClick(cardElement, listingId) {
+    if (selectedListingIds.has(listingId)) {
+        selectedListingIds.delete(listingId);
+        cardElement.classList.remove('selected');
+    } else {
+        selectedListingIds.add(listingId);
+        cardElement.classList.add('selected');
+    }
+
+    updateSelectionInfo();
+}
+
+function updateSelectionInfo() {
+    const selectionInfo = document.getElementById('selection-info');
+    const selectionCount = document.getElementById('selection-count');
+    const compareButton = document.getElementById('compare-button');
+    const count = selectedListingIds.size;
+
+    if (count > 0) {
+        selectionInfo.classList.add('visible');
+        selectionCount.textContent = `Đã chọn: ${count}`;
+    } else {
+        selectionInfo.classList.remove('visible');
+    }
+
+    // Nút so sánh chỉ bật khi có từ 2 lựa chọn trở lên
+    compareButton.disabled = count < 2;
+}
+
+function clearAllSelections() {
+    selectedListingIds.clear();
+    
+    // Bỏ lớp 'selected' khỏi tất cả các card đang hiển thị
+    const selectedCards = document.querySelectorAll('.card.selected');
+    selectedCards.forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    updateSelectionInfo();
+}
+
+
 
 function populateProvinces() {
     fetch('/api/locations/provinces')
