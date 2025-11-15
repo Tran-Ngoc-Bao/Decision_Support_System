@@ -4,24 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>So Sánh và Lựa Chọn Tiêu Chí</title>
+    <link rel="stylesheet" href="../static/css/base.css">
     <link rel="stylesheet" href="../static/css/compare.css">
 </head>
 <body>
 
-<div class="compare-container">
+<div class="main-container">
     <a href="javascript:history.back()" class="back-link">&laquo; Quay lại trang tìm kiếm</a>
 
-    <h1>So Sánh và các lựa chọn</h1>
+    <h1>So Sánh các lựa chọn</h1>
 
-    <h2>Chọn tiêu chí & trọng số</h2>
-    <form id="compare-form">
-        <div id="amenities-container" class="amenities-container">
-            <!-- Danh sách tiện ích sẽ được chèn vào đây bằng JavaScript -->
-            <p>Đang tải danh sách tiện ích...</p>
+    <div class="panel">
+        <h2 class="collapsible-header">Chọn tiêu chí & trọng số</h2>
+        <div class="collapsible-content">
+            <form id="compare-form">
+                <div id="amenities-container" class="amenities-container">
+                    <p>Đang tải danh sách tiện ích...</p>
+                </div>
+                <button type="submit">So sánh</button>
+            </form>
         </div>
+    </div>
 
-        <button type="submit">So sánh ngay</button>
-    </form>
+    <div id="results-compare" class="panel"></div>
 
     <div id="results"></div>
 </div>

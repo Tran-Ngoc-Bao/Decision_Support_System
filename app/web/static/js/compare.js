@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAmenities();
 
     const form = document.getElementById("compare-form");
-    const resultsDiv = document.getElementById("results");
+    const resultsDiv = document.getElementById("results-compare");
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -121,50 +121,47 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let idealCriteriaHtml = '';
+        let idealSolutionsHtml = '';
         if (idealBest && idealWorst) {
-            idealCriteriaHtml = `
+            idealSolutionsHtml = `
                 <div class="collapsible-section">
-                    <h2 class="collapsible-header">Tiêu chí lý tưởng và tồi nhất <span class="toggle-icon">-</span></h2>
+                    <h2 class="collapsible-header">Bảng Tiêu Chí Lý Tưởng <span class="toggle-icon">-</span></h2>
                     <div class="collapsible-content" style="display: block;">
-                        <div class="ideal-criteria">
-                            <div class="ideal-card">
-                                <h3>Lý tưởng (Ideal Best)</h3>
-                                <p><strong>Giá:</strong> ${idealBest.price.toFixed(2)} triệu</p>
-                                <p><strong>Diện tích:</strong> ${idealBest.acreage.toFixed(2)} m²</p>
-                                <p><strong>Tỉ lệ diện tích/giá:</strong> ${idealBest.acreage_ratio.toFixed(3)}</p>
-                                <p><strong>Điểm tiện ích:</strong> ${idealBest.amenities_w.toFixed(3)}</p>
-                                <p><strong>Tỉ lệ tiện ích/giá:</strong> ${idealBest.amenities_ratio.toFixed(3)}</p>
-                            </div>
-                            <div class="ideal-card">
-                                <h3>Tồi nhất (Ideal Worst)</h3>
-                                <p><strong>Giá:</strong> ${idealWorst.price.toFixed(2)} triệu</p>
-                                <p><strong>Diện tích:</strong> ${idealWorst.acreage.toFixed(2)} m²</p>
-                                <p><strong>Tỉ lệ diện tích/giá:</strong> ${idealWorst.acreage_ratio.toFixed(3)}</p>
-                                <p><strong>Điểm tiện ích:</strong> ${idealWorst.amenities_w.toFixed(3)}</p>
-                                <p><strong>Tỉ lệ tiện ích/giá:</strong> ${idealWorst.amenities_ratio.toFixed(3)}</p>
-                            </div>
-                        </div>
+                        <table class="ideal-table">
+                            <thead>
+                                <tr>
+                                    <th>Tiêu chí</th>
+                                    <th>Lý tưởng (Tốt nhất)</th>
+                                    <th>Tồi nhất</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Giá (triệu)</td><td>${idealBest.price.toFixed(2)}</td><td>${idealWorst.price.toFixed(2)}</td></tr>
+                                <tr><td>Diện tích (m²)</td><td>${idealBest.acreage.toFixed(2)}</td><td>${idealWorst.acreage.toFixed(2)}</td></tr>
+                                <tr><td>Tỉ lệ diện tích/giá</td><td>${idealBest.acreage_ratio.toFixed(3)}</td><td>${idealWorst.acreage_ratio.toFixed(3)}</td></tr>
+                                <tr><td>Điểm tiện ích</td><td>${idealBest.amenities_w.toFixed(3)}</td><td>${idealWorst.amenities_w.toFixed(3)}</td></tr>
+                                <tr><td>Tỉ lệ tiện ích/giá</td><td>${idealBest.amenities_ratio.toFixed(3)}</td><td>${idealWorst.amenities_ratio.toFixed(3)}</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             `;
         }
 
-        const tableHtml = `
+        const resultsTableHtml = `
             <div class="collapsible-section">
-                <h2 class="collapsible-header">Kết quả xếp hạng <span class="toggle-icon">-</span></h2>
+                <h2 class="collapsible-header">Bảng Xếp Hạng Chi Tiết <span class="toggle-icon">-</span></h2>
                 <div class="collapsible-content" style="display: block;">
                     <table class="results-table">
                         <thead>
                             <tr>
-                                <th>Id   </th>
                                 <th>Hạng</th>
                                 <th>Tiêu đề</th>
                                 <th>Giá (triệu)</th>
                                 <th>Diện tích (m²)</th>
-                                <th>Điểm diện tích (m²/triệu)</th>
-                                <th>Phù hợp tiện ích</th>
-                                <th>Điểm tiện ích (/triệu)</th>
+                                <th>Điểm DT/Giá</th>
+                                <th>Điểm Tiện Ích</th>
+                                <th>Điểm TT/Giá</th>
                                 <th>Điểm TOPSIS</th>
                                 <th>Tiện ích phù hợp</th>
                             </tr>
@@ -173,28 +170,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${houses.map(h => {
                                 const availableAmenitiesHtml = (h.environments || [])
                                     .map(amenity => {
-                                        // Đánh dấu các tiện ích khớp với lựa chọn của người dùng
                                         const isMatched = (h.matched_amenities || []).some(matched => matched.id === amenity.id);
                                         return `<span class="amenity-tag ${isMatched ? 'matched' : ''}">${amenity.value}</span>`;
                                     })
-                                    .join(', ');
+                                    .join('');
 
                                 return `
                                 <tr>
-                                    <td>${h.id}   </td>
-                                    <td>${h.rank}</td>
+                                    <td class="rank-cell">${h.rank}</td>
                                     <td title="${h.address}">${h.title}</td>
-                                    <td>${h.price}</td>
-                                    <td>${h.acreage}</td>
+                                    <td>${h.price.toFixed(2)}</td>
+                                    <td>${h.acreage.toFixed(2)}</td>
                                     <td>${h.acreage_ratio.toFixed(3)}</td>
                                     <td>${h.amenities_w.toFixed(3)}</td>
                                     <td>${h.amenities_ratio.toFixed(3)}</td>
-                                    <td>${h.topsis_score.toFixed(3)}</td>
-                                    <td>
-                                        <div class="amenities-list">
-                                            ${availableAmenitiesHtml || 'Không có thông tin'}
-                                        </div>
-                                    </td>
+                                    <td class="score-cell">${h.topsis_score.toFixed(4)}</td>
+                                    <td><div class="amenities-list">${availableAmenitiesHtml || 'N/A'}</div></td>
                                 </tr>
                                 `;
                             }).join("")}
@@ -205,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         // Hiển thị tiêu chí lý tưởng trước, sau đó đến bảng kết quả
-        resultsDiv.innerHTML = idealCriteriaHtml + tableHtml;
+        resultsDiv.innerHTML = idealSolutionsHtml + resultsTableHtml;
     }
 
     // Thêm event listener cho các mục có thể thu gọn/mở rộng
