@@ -65,3 +65,89 @@ a {
     background-color: #fff;
     padding: 15px
 }
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+.card.selected {
+    border: 2px solid #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    background-color: #f8f9fa;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card-content {
+    padding: 20px;
+    flex-grow: 1;
+}
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0 0 10px;
+    color: #3498db;
+}
+.card-info {
+    margin-bottom: 10px;
+}
+.card-info strong {
+    color: #555;
+}
+.card-footer {
+    background-color: #f9f9f9;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    font-weight: bold;
+}
+.price {
+    color: #e74c3c;
+    font-size: 1.2rem;
+}
+.acreage {
+    color: #27ae60;
+}
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 15px;
+}
+.tag {
+    background-color: #ecf0f1;
+    color: #7f8c8d;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+.pagination-controls button {
+    padding: 8px 16px;
+    border: 1px solid #3498db;
+    background-color: #fff;
+    color: #3498db;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #3498db;
+    color: #fff;
+}
+.pagination-controls button:disabled {
+    border-color: #ccc;
+    color: #ccc;
+    cursor: not-allowed;
+}

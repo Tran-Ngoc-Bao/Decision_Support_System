@@ -1,3 +1,6 @@
+let currentPage = 1;
+const PAGE_SIZE = 12; // Hiển thị 12 kết quả mỗi trang
+
 document.addEventListener('DOMContentLoaded', () => {
     const amenitiesContainer = document.getElementById('amenities-container');
 
@@ -104,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             renderResults(data);
+            renderCardResults(data)
 
         } catch (error) {
             console.error("❌ Lỗi khi gọi API so sánh:", error);
@@ -171,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const availableAmenitiesHtml = (h.environments || [])
                                     .map(amenity => {
                                         const isMatched = (h.matched_amenities || []).some(matched => matched.id === amenity.id);
-                                        return `<span class="amenity-tag ${isMatched ? 'matched' : ''}">${amenity.value}</span>`;
+                                        return isMatched? `<span class="amenity-tag-matched">${amenity.category}: ${amenity.value}</span>`: '';
                                     })
                                     .join('');
 
@@ -197,6 +201,64 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Hiển thị tiêu chí lý tưởng trước, sau đó đến bảng kết quả
         resultsDiv.innerHTML = idealSolutionsHtml + resultsTableHtml;
+    }
+
+    function renderCardResults(data) {
+        const houses = data.ranked_houses || [];
+
+        if (houses.length === 0) {
+            resultsDiv.innerHTML = "<p>Không có dữ liệu kết quả.</p>";
+            return;
+        }
+
+        const resultsContainer = document.getElementById('results');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageInfo = document.getElementById('page-info');
+
+        // Cập nhật thông tin trang
+        pageInfo.textContent = `Trang ${currentPage}`;
+
+        // Cập nhật trạng thái nút
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = houses.length < PAGE_SIZE;
+
+        resultsContainer.innerHTML = ''; // Xóa kết quả cũ
+
+        if (houses.length === 0) {
+            resultsContainer.innerHTML = "<p>Không có dữ liệu kết quả.</p>";
+            return;
+        }
+
+        houses.forEach(h => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-listing-id', h.id);
+
+            const fullAddress = `${h.address}`;
+
+            const tagsHtml = (h.environments || []).map(tag => {
+                const isMatched = (h.matched_amenities || []).some(matched => matched.id === tag.id);
+                return `<span class="amenity-tag ${isMatched ? 'matched' : ''}">${tag.category}: ${tag.value}</span>`;
+            }).join('');
+
+            card.innerHTML = `
+                <div class="card-content">
+                    <h3 class="card-title">${h.title}</h3>
+                    <p class="card-info"><strong>Địa chỉ:</strong> ${fullAddress}</p>
+                    <p class="card-info"><strong>Loại hình:</strong> ${h.house_type || 'N/A'}</p>
+                    <p class="card-info"><strong>Hợp đồng:</strong> ${h.contract_period || 'N/A'}</p>
+                    <p class="card-info"><strong>Liên hệ:</strong> ${h.phone_number || 'N/A'}</p>
+                    <div class="tags-container">${tagsHtml}</div>
+                </div>
+                <div class="card-footer">
+                    <span class="price">${h.price} triệu/tháng</span> - 
+                    <span class="acreage">${h.acreage} m²</span>
+                </div>            
+            `;
+
+            resultsContainer.appendChild(card);
+        });
     }
 
     // Thêm event listener cho các mục có thể thu gọn/mở rộng

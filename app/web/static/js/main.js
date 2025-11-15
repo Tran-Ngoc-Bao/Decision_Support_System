@@ -160,7 +160,7 @@ function displayResults(listings) {
         const fullAddress = `${listing.address}`;
 
         const tagsHtml = (listing.environments || [])
-            .map(tag => `<span class="tag">${tag.value}</span>`)
+            .map(tag => `<span class="tag">${tag.category}: ${tag.value}</span>`)
             .join('');
 
         card.innerHTML = `
