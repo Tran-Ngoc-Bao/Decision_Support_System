@@ -164,9 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Tiêu đề</th>
                                 <th>Giá (triệu)</th>
                                 <th>Diện tích (m²)</th>
-                                <th>Điểm DT/Giá</th>
+                                <th>Điểm Diện Tích/Giá</th>
                                 <th>Điểm Tiện Ích</th>
-                                <th>Điểm TT/Giá</th>
+                                <th>Điểm Tiện Ích/Giá</th>
                                 <th>Điểm TOPSIS</th>
                                 <th>Tiện ích phù hợp</th>
                             </tr>
