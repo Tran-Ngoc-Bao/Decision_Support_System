@@ -156,7 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="collapsible-section">
                 <h2 class="collapsible-header">Bảng Xếp Hạng Chi Tiết <span class="toggle-icon">-</span></h2>
                 <div class="collapsible-content" style="display: block;">
-                    <table class="results-table">
+                    <div class="table-scroll">
+                        <table class="results-table">
                         <thead>
                             <tr>
                                 <th>Hạng</th>
@@ -175,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const availableAmenitiesHtml = (h.environments || [])
                                     .map(amenity => {
                                         const isMatched = (h.matched_amenities || []).some(matched => matched.id === amenity.id);
-                                        return isMatched? `<span class="amenity-tag-matched">${amenity.category}: ${amenity.value}</span>`: '';
+                                        return isMatched? `<span class="amenity-tag matched">${amenity.category}: ${amenity.value}</span>`: '';
                                     })
                                     .join('');
 
@@ -195,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }).join("")}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         `;

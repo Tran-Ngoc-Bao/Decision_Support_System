@@ -168,6 +168,15 @@ button[type="submit"]:hover {
     color: #27ae60;
 }
 
+
+.table-scroll {
+    max-height: 1000px;   /* tùy chỉnh */
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #ecf0f1;
+    border-radius: 6px;
+}
+
 #results {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
