@@ -18,6 +18,7 @@ class TOPSIS:
         """Chuẩn hóa vector"""
         squared = self.matrix ** 2
         sum_squared = np.sum(squared, axis=0)
+        sum_squared[sum_squared == 0] = 1
         self.normalized_matrix = self.matrix / np.sqrt(sum_squared)
         return self.normalized_matrix
     
@@ -77,8 +78,22 @@ class TOPSIS:
         return distances_best, distances_worst
     
     def calculate_scores(self, distances_best, distances_worst):
-        """Tính điểm TOPSIS"""
-        return distances_worst / (distances_best + distances_worst)
+        """Tính điểm TOPSIS, xử lý trường hợp khoảng cách bằng 0"""
+        distances_best = np.array(distances_best)
+        distances_worst = np.array(distances_worst)
+
+        # Tạo mảng score rỗng
+        scores = np.zeros_like(distances_best, dtype=float)
+
+        # Tìm vị trí tổng khoảng cách = 0
+        zero_mask = (distances_best + distances_worst) == 0
+
+        # Nếu tổng khoảng cách = 0, gán score = 0.5 (hoặc bất kỳ giá trị trung lập nào)
+        scores[zero_mask] = 0.5
+
+        # Những vị trí khác tính bình thường
+        scores[~zero_mask] = distances_worst[~zero_mask] / (distances_best[~zero_mask] + distances_worst[~zero_mask])
+        return scores
     
     def solve(self):
         """Thực hiện toàn bộ quy trình TOPSIS"""
@@ -89,7 +104,7 @@ class TOPSIS:
         ideal_best, ideal_worst = self.find_ideal_solutions()
         
         dist_best, dist_worst = self.calculate_distances(ideal_best, ideal_worst)
-        
+
         scores = self.calculate_scores(dist_best, dist_worst)
         
         return scores

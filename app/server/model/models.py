@@ -82,6 +82,10 @@ class CompareResultItem(HouseRentItem):
     """
     topsis_score: float
     rank: int
+    acreage_ratio: float
+    amenities_w: float
+    amenities_ratio: float
+    matched_amenities: List[EnvironmentTag] = []
 
 class TopsisCompareResponse(BaseModel):
     """

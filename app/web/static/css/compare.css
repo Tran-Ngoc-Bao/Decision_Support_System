@@ -105,3 +105,47 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color: #2980b9;
 }
+
+.amenities-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 300px; /* Giới hạn chiều rộng để không làm vỡ layout */
+}
+
+.amenity-tag {
+    background-color: #ecf0f1; /* Màu xám nhạt cho tiện ích không khớp */
+    color: #7f8c8d;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+}
+
+.amenity-tag.matched {
+    background-color: #27ae60; /* Màu xanh cho tiện ích khớp */
+    color: white;
+    font-weight: bold;
+}
+
+.collapsible-section {
+    margin-bottom: 20px;
+}
+
+.collapsible-header {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    cursor: pointer;
+    padding: 15px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    user-select: none; /* Ngăn chọn văn bản khi click */
+}
+
+.toggle-icon {
+    float: right;
+    font-weight: bold;
+}

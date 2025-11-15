@@ -22,24 +22,33 @@ def compare(request: CompareRequest, conn=Depends(get_db_connection)):
 
     try:
         houses = HouseService.get_multiple_houses_by_ids(conn, request.house_rent_ids)
-        data = _data_vectorizer(houses, request)
+
+        houses_df = pd.DataFrame(houses)
+        
+        dss_matrix = _data_vectorizer(houses, request)
+        
+        houses_df = pd.merge(houses_df, dss_matrix[['id', 'acreage_ratio', 'amenities_w', 'amenities_ratio']], on='id')
+
         cols = ['price', 'acreage', 'acreage_ratio', 'amenities_w', 'amenities_ratio']
-        decision_matrix = data[cols].to_numpy()
+        decision_matrix = houses_df[cols].to_numpy()
+        
         topsis_weights = normL2(request.topsis_weight) \
             if request.topsis_weight is not None and len(request.topsis_weight) != 0 \
             else np.ones(len(cols)) / len(cols)
+            
         criteria_types = ['cost', 'benefit', 'benefit', 'benefit', 'benefit']
         topsis = TOPSIS(decision_matrix, topsis_weights, criteria_types)
-        scores = topsis.solve() # Unpack the tuple returned by solve
+        scores = topsis.solve()
 
-        # set score
-        for i, score in enumerate(scores):
-            houses[i]['topsis_score'] = score
+        # Gán điểm TOPSIS và xếp hạng
+        houses_df['topsis_score'] = scores
+        houses_df = houses_df.sort_values(by='topsis_score', ascending=False).reset_index(drop=True)
+        houses_df['rank'] = houses_df.index + 1
 
-        # sort by score and assign rank        
-        ranked_houses = sorted(houses, key=lambda x: x['topsis_score'], reverse=True)
-        for i, house in enumerate(ranked_houses):
-            house['rank'] = i + 1
+        # Thêm thông tin tiện ích khớp và tiện ích có sẵn
+        requested_amenities_ids = set(request.amenities)
+        houses_df['matched_amenities'] = houses_df['environments'].apply(lambda envs: [env for env in envs if env['id'] in requested_amenities_ids])
+        ranked_houses = houses_df.to_dict('records')
 
         # Lấy ideal best/worst từ dữ liệu gốc (chưa chuẩn hóa)
         ideal_best_raw, ideal_worst_raw = topsis.find_ideal_solutions_raw()
@@ -61,9 +70,9 @@ def _data_vectorizer(house_data: list, request: CompareRequest):
 
     df = pd.DataFrame(house_data)
 
-    weights = normL2(request.weights) \
+    weights = request.weights \
         if request.weights is not None and len(request.weights) != 0 \
-        else np.ones(len(request.amenities)) / len(request.amenities)
+        else np.ones(len(request.amenities)) * 100
 
     amenities = request.amenities
 

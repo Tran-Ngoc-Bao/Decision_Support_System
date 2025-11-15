@@ -56,24 +56,3 @@ def search_house_rent(
         print(f"ERROR in search_house_rent: {e}")
         conn.close()
         raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
-
-
-@router.get("/house-rent-by-id", response_model=HouseRentItem)
-def get_house_rent_by_id(
-        id: int = Query(...),
-        conn=Depends(get_db_connection)
-):
-    """
-    Get a single house rent listing by its ID
-    """
-    try:
-        result = HouseService.get_house_rent_by_id(conn=conn, house_rent_id=id)
-        if not result:
-            raise HTTPException(status_code=404, detail="House not found")
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"ERROR in get_house_rent_by_id: {e}")
-        conn.close()
-        raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
