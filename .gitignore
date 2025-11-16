@@ -1,1 +1,8 @@
 api/__pycache__/
+app/server/__pycache__/
+app/server/dependency/__pycache__/
+app/server/logic/__pycache__/
+app/server/middleware/__pycache__/
+app/server/model/__pycache__/
+app/server/routers/__pycache__/
+app/server/utils/__pycache__/
