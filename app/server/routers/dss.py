@@ -17,6 +17,10 @@ router = APIRouter(prefix="/dss", tags=["DSS"])
 
 @router.post("/compare", response_model=TopsisCompareResponse)
 def compare(request: CompareRequest, conn=Depends(get_db_connection)):
+
+    if not request.prefer_location:
+        request.prefer_location = [21.0285, 105.8542]
+
     if not request.house_rent_ids:
         return []
 
@@ -27,16 +31,16 @@ def compare(request: CompareRequest, conn=Depends(get_db_connection)):
         
         dss_matrix = _data_vectorizer(houses, request)
         
-        houses_df = pd.merge(houses_df, dss_matrix[['id', 'acreage_ratio', 'amenities_w', 'amenities_ratio']], on='id')
+        houses_df = pd.merge(houses_df, dss_matrix[['id', 'acreage_ratio', 'amenities_w', 'amenities_ratio', 'distance_to_prefer_location']], on='id')
 
-        cols = ['price', 'acreage', 'acreage_ratio', 'amenities_w', 'amenities_ratio']
+        cols = ['price', 'acreage', 'acreage_ratio', 'amenities_w', 'amenities_ratio', 'distance_to_prefer_location']
         decision_matrix = houses_df[cols].to_numpy()
         
         topsis_weights = normL2(request.topsis_weight) \
             if request.topsis_weight is not None and len(request.topsis_weight) != 0 \
             else np.ones(len(cols)) / len(cols)
             
-        criteria_types = ['cost', 'benefit', 'benefit', 'benefit', 'benefit']
+        criteria_types = ['cost', 'benefit', 'benefit', 'benefit', 'benefit', 'cost']
         topsis = TOPSIS(decision_matrix, topsis_weights, criteria_types)
         scores = topsis.solve()
 
@@ -88,5 +92,11 @@ def _data_vectorizer(house_data: list, request: CompareRequest):
         lambda house_amenities: sum(amenity_weight_map.get(amenity['id'], 0) for amenity in house_amenities)
     )
     dss_matrix['amenities_ratio'] = dss_matrix['amenities_w'] / df['price']
+    prefer_location = request.prefer_location
+    dss_matrix['distance_to_prefer_location'] = df.apply(
+        lambda row: np.inf if pd.isna(row['latitude']) or pd.isna(row['longitude'])
+        else ((prefer_location[0] - row['latitude']) ** 2 + (prefer_location[1] - row['longitude']) ** 2) ** 0.5,
+        axis=1
+    )
 
     return dss_matrix

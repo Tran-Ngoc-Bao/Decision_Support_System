@@ -75,6 +75,7 @@ class CompareRequest(BaseModel):
     amenities: Optional[List[int]]
     weights: Optional[List[int]]
     topsis_weight: Optional[List[float]]
+    prefer_location: Optional[List[float]]
 
 class CompareResultItem(HouseRentItem):
     """
@@ -85,6 +86,7 @@ class CompareResultItem(HouseRentItem):
     acreage_ratio: float
     amenities_w: float
     amenities_ratio: float
+    distance_to_prefer_location: float
     matched_amenities: List[EnvironmentTag] = []
 
 class TopsisCompareResponse(BaseModel):

@@ -82,12 +82,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Lấy vĩ độ và kinh độ từ input
+        const lat = parseFloat(document.getElementById('preferred-lat').value);
+        const lon = parseFloat(document.getElementById('preferred-lon').value);
+
         const payload = {
             house_rent_ids: houseIds,
             amenities: amenities,
             weights: weights,
             topsis_weight: [] // nếu bạn cần trọng số TOPSIS riêng thì thêm sau
         };
+
+        // Thêm vị trí ưu tiên vào payload nếu người dùng đã nhập
+        if (!isNaN(lat) && !isNaN(lon)) {
+            payload.prefer_location = [lat, lon];
+        } else {
+            payload.prefer_location = [];
+        }
 
         console.log("📤 Gửi dữ liệu:", payload);
 
@@ -145,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <tr><td>Tỉ lệ diện tích/giá</td><td>${idealBest.acreage_ratio.toFixed(3)}</td><td>${idealWorst.acreage_ratio.toFixed(3)}</td></tr>
                                 <tr><td>Điểm tiện ích</td><td>${idealBest.amenities_w.toFixed(3)}</td><td>${idealWorst.amenities_w.toFixed(3)}</td></tr>
                                 <tr><td>Tỉ lệ tiện ích/giá</td><td>${idealBest.amenities_ratio.toFixed(3)}</td><td>${idealWorst.amenities_ratio.toFixed(3)}</td></tr>
+                                <tr><td>Điểm vị trí (km)</td><td>${idealBest.distance_to_prefer_location.toFixed(3)}</td><td>${idealWorst.distance_to_prefer_location.toFixed(3)}</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -167,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th>Điểm Diện Tích/Giá</th>
                                 <th>Điểm Tiện Ích</th>
                                 <th>Điểm Tiện Ích/Giá</th>
+                                <th>Điểm Vị Trí (km)</th>
                                 <th>Điểm TOPSIS</th>
                                 <th>Tiện ích phù hợp</th>
                             </tr>
@@ -189,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <td>${h.acreage_ratio.toFixed(3)}</td>
                                     <td>${h.amenities_w.toFixed(3)}</td>
                                     <td>${h.amenities_ratio.toFixed(3)}</td>
+                                    <td>${h.distance_to_prefer_location.toFixed(3)}</td>
                                     <td class="score-cell">${h.topsis_score.toFixed(4)}</td>
                                     <td><div class="amenities-list">${availableAmenitiesHtml || 'N/A'}</div></td>
                                 </tr>
