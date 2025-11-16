@@ -21,8 +21,8 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-height: 400px; /* Giới hạn chiều cao và cho phép cuộn */
-    overflow-y: auto; /* Thêm thanh cuộn khi cần */
+    max-height: 400px; 
+    overflow-y: auto; 
     padding: 15px;
     border: 1px solid #ecf0f1;
     border-radius: 5px;
@@ -57,7 +57,7 @@
 }
 
 .amenity .weight-value {
-    /* Không cần thiết nữa khi dùng input number */
+    
 }
 
 button[type="submit"] {
@@ -96,12 +96,12 @@ button[type="submit"]:hover {
 }
 
 .ideal-table td:nth-child(2) {
-    background-color: #eaf7ec; /* Nền xanh cho cột best */
+    background-color: #eaf7ec; 
     font-weight: 500;
 }
 
 .ideal-table td:nth-child(3) {
-    background-color: #fbe9e7; /* Nền đỏ cho cột worst */
+    background-color: #fbe9e7; 
 }
 
 .results-table {
@@ -134,11 +134,11 @@ button[type="submit"]:hover {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-    max-width: 300px; /* Giới hạn chiều rộng để không làm vỡ layout */
+    max-width: 300px; 
 }
 
 .amenity-tag {
-    background-color: #ecf0f1; /* Màu xám nhạt cho tiện ích không khớp */
+    background-color: #ecf0f1; 
     color: #7f8c8d;
     padding: 3px 8px;
     border-radius: 12px;
@@ -146,7 +146,7 @@ button[type="submit"]:hover {
 }
 
 .amenity-tag.matched {
-    background-color: #27ae60; /* Màu xanh cho tiện ích khớp */
+    background-color: #27ae60; 
     color: white;
     font-weight: bold;
 }
@@ -170,7 +170,7 @@ button[type="submit"]:hover {
 
 
 .table-scroll {
-    max-height: 1000px;   /* tùy chỉnh */
+    max-height: 1000px;   
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #ecf0f1;
@@ -181,4 +181,72 @@ button[type="submit"]:hover {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
+}
+.map-btn {
+    display: block; 
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 15px auto; 
+    background: #d7dfdb;
+    color: #27ae60;
+    border: 3px solid #27ae60;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.map-btn .icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.location-inputs {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 20px; 
+    max-width: 800px; 
+    margin: 0 auto; 
+    padding: 20px;
+    background-color: #f9f9f9; 
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.input-group {
+    display: flex;
+    align-items: center; 
+    gap: 10px; 
+    flex: 1; 
+    min-width: 250px; 
+}
+
+.location-inputs label {
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap; 
+    min-width: 50px;
+    text-align: right; 
+}
+
+.location-inputs input {
+    flex: 1; 
+    padding: 10px;
+    border: 1px solid #007bff; 
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.location-inputs input:focus,
+.location-inputs input:hover {
+    border-color: #0056b3; 
+    outline: none;
 }

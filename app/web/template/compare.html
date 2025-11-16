@@ -9,35 +9,49 @@
 </head>
 <body>
 
-<div class="main-container">
-    <a href="javascript:history.back()" class="back-link">&laquo; Quay lại trang tìm kiếm</a>
+    <div class="main-container">
+        <a href="javascript:history.back()" class="back-link">&laquo; Quay lại trang tìm kiếm</a>
 
-    <h1>So Sánh các lựa chọn</h1>
+        <h1>So Sánh các lựa chọn</h1>
 
-    <div class="panel">
-        <h2 class="collapsible-header">Chọn tiêu chí & trọng số</h2>
-        <div class="collapsible-content">
-            <form id="compare-form">
-                <div id="amenities-container" class="amenities-container">
-                    <p>Đang tải danh sách tiện ích...</p>
-                </div>
-                <button type="submit">So sánh</button>
-            </form>
+        <div class="panel">
+            <h2 class="collapsible-header">Chọn tiêu chí & trọng số</h2>
+            <div class="collapsible-content">
+                <form id="compare-form">
+                    <div id="amenities-container" class="amenities-container">
+                        <p>Đang tải danh sách tiện ích...</p>
+                    </div>
+
+                    <button type="button" id="choose-location-btn" class="map-btn">
+                        <img src="../static/icon/ggmaps_icon.png" alt="Bản đồ" class="icon">
+                        Chọn vị trí ưu tiên
+                    </button>
+
+                    <div class="location-inputs">
+                        <label for="preferred-lat">Vĩ độ (Latitude)</label>
+                        <input type="number" id="preferred-lat" name="preferred_lat" step="any" placeholder="21.0285">
+                        <label for="preferred-lon">Kinh độ (Longitude)</label>
+                        <input type="number" id="preferred-lon" name="preferred_lon" step="any" placeholder="105.8542">
+                    </div>
+
+                    <button type="submit">So sánh</button>
+                </form>
+            </div>
         </div>
+
+        <div id="results-compare" class="panel"></div>
+
+        <div id="results"></div>
+
+        <div id="pagination-controls" class="pagination-controls">
+            <button id="prev-page" disabled>&laquo; Trang trước</button>
+            <span id="page-info">Trang 1</span>
+            <button id="next-page" disabled>Trang sau &raquo;</button>
+        </div>
+
     </div>
 
-    <div id="results-compare" class="panel"></div>
-
-    <div id="results"></div>
-
-    <div id="pagination-controls" class="pagination-controls">
-        <button id="prev-page" disabled>&laquo; Trang trước</button>
-        <span id="page-info">Trang 1</span>
-        <button id="next-page" disabled>Trang sau &raquo;</button>
-    </div>
-</div>
-
-<script src="../static/js/compare.js"></script>
+    <script src="../static/js/compare.js"></script>
 
 </body>
 </html>
